@@ -1,0 +1,4 @@
+/env
+/.env
+calculator/pkg/__pycache__
+functions/__pycache__
