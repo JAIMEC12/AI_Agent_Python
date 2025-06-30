@@ -35,7 +35,8 @@ All paths you provide should be relative to the working directory. You do not ne
         messages = [
             types.Content(role="user",parts=[types.Part(text=user_prompt)])
         ]
-        generate_content(client,messages,verbose,system_prompt)
+        print(generate_content(client,messages,verbose,system_prompt))
+
     else:
         print("Error, there is no prompt. In order to use this AI Code Assistant you need to execute main.py with an argument next to it")
         print("Example: python main.py 'What is Python'")
@@ -43,35 +44,45 @@ All paths you provide should be relative to the working directory. You do not ne
 
 
 def generate_content(client,messages,verbose, system_prompt):
+    times = 0
 
     available_functions = types.Tool(
         function_declarations=[schema_get_files_info,schema_get_files_content,schema_run_python_file,schema_write_file]
     )
 
     config= types.GenerateContentConfig(tools=[available_functions], system_instruction=system_prompt)
+    while times < 20:
 
-    response = client.models.generate_content(model="gemini-2.0-flash-001", contents=messages,config=config)
-    
+        times +=1
+        response = client.models.generate_content(model="gemini-2.0-flash-001", contents=messages,config=config)
 
-    if verbose:
-      print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}\n")
-      print(f"Response tokens: {response.usage_metadata.candidates_token_count}\n")
+        if response.candidates:
+            for candidate in response.candidates:
+                messages.append(candidate.content)
 
-    function_response = []
-    
-    if response.function_calls:
-        for function in response.function_calls:
-            function_call_result = call_function(function, verbose)
-            if not function_call_result.parts or not function_call_result.parts[0].function_response:
-                raise Exception("empty function results")
-            if verbose:
-                print(f"-> {function_call_result.parts[0].function_response.response}")
-            function_response.append(function_call_result.parts[0])
-    
-        if not function_response:
-            raise Exception("No response from functions")
-    else:
-        return response.text
+        if verbose:
+            print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}\n")
+            print(f"Response tokens: {response.usage_metadata.candidates_token_count}\n")
+
+        if not response.function_calls:
+            print(f"Final response: ")
+            return response.text
+        
+        function_response = []
+            
+        if response.function_calls:
+            for function in response.function_calls:
+                function_call_result = call_function(function, verbose)
+                if not function_call_result.parts or not function_call_result.parts[0].function_response:
+                    raise Exception("empty function results")
+                if verbose:
+                    print(f"-> {function_call_result.parts[0].function_response.response}")
+                function_response.append(function_call_result.parts[0])
+                messages.append(function_call_result)
+        
+            if not function_response:
+                raise Exception("No response from functions") 
+
 
 
 def call_function(function_call_part, verbose = False):

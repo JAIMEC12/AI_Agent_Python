@@ -30,14 +30,15 @@ schema_write_file = types.FunctionDeclaration(
     parameters=types.Schema(
         type=types.Type.OBJECT,
         properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The path where the file to be overwritten is located, relative to the working directory, if the file does not exist, it creates one relative to the working directory with its respective directory parents"
+                ),            
             "content": types.Schema(
                 type=types.Type.STRING,
                 description="The content which will be overwritten or written in the file specified"
                 ),
-            "file_path": types.Schema(
-                type=types.Type.STRING,
-                description="The path where the file to be overwritten is located, relative to the working directory, if the file does not exist, it creates one relative to the working directory with its respective directory parents"
-                ),
             },
+        required=["file_path", "content"],
         ),
     )

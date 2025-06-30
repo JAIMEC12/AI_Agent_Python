@@ -16,7 +16,7 @@ def get_file_content(working_directory, file_path):
 def read_file(file):
     MAX_CHARS = 10000
     try:
-        with open(file,"r") as f:
+        with open(file,"r", encoding="utf-8") as f:
             string_text = f.read(MAX_CHARS)
             return string_text if len(string_text)<MAX_CHARS else string_text + f"...File '{file}' truncated at 10000 characters"
     except Exception as e:

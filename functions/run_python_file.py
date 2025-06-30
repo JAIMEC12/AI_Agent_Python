@@ -4,7 +4,7 @@ from google.genai import types
 
 def run_python_file(working_directory, file_path,args=None):
 
-    path = os.path.join(working_directory,file_path)
+    path = os.path.join(os.path.abspath(working_directory),file_path)
 
     if not os.path.abspath(path).startswith(os.path.abspath(working_directory)):
         return f"Error: Cannot execute '{file_path}' as it is outside the permitted working directory"
@@ -43,7 +43,8 @@ schema_run_python_file = types.FunctionDeclaration(
             "file_path": types.Schema(
                 type=types.Type.STRING,
                 description="The path where the file to be executed is located, relative to the working directory."
-                ),
+                ), 
             },
+        required=["file_path"],
         ),
     )

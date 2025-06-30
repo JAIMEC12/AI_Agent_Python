@@ -3,7 +3,10 @@ from google.genai import types
 
 def get_files_info(working_directory, directory=None):
 
-    path = os.path.join(os.path.abspath(working_directory),directory)
+    path = os.path.abspath(working_directory)
+
+    if directory:
+        path = os.path.join(os.path.abspath(working_directory),directory)
 
     # if directory.startswith(".") and "../" not in directory:
     #     directory= working_directory
@@ -40,7 +43,7 @@ schema_get_files_info = types.FunctionDeclaration(
         properties={
             "directory": types.Schema(
                 type=types.Type.STRING,
-                description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself. "
+                description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself. That means '.' "
                 ),
             },
         ),
