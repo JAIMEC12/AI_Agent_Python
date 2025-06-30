@@ -1,12 +1,13 @@
 import os
+from google.genai import types
 
 def get_files_info(working_directory, directory=None):
 
-    path = os.path.join(working_directory,directory)
+    path = os.path.join(os.path.abspath(working_directory),directory)
 
-    if directory.startswith(".") and "../" not in directory:
-        directory= working_directory
-        path = directory
+    # if directory.startswith(".") and "../" not in directory:
+    #     directory= working_directory
+    #     path = directory
     
     if not os.path.abspath(path).startswith(os.path.abspath(working_directory)):
         return f"Error: Cannot list '{directory}' as it is outside the permitted working directory"
@@ -31,24 +32,16 @@ def get_content(directory_content):
         return f"Error: {e}"
 
 
-def get_file_content(working_directory, file_path):
-    path = os.path.join(working_directory,file_path)
-
-    print(os.path.abspath(path).startswith(os.path.abspath(working_directory)))
-
-    if not os.path.abspath(path).startswith(os.path.abspath(working_directory)):
-        return f"Error: Cannot read '{file_path}' as it is outside the permitted working directory"
-
-    if not os.path.isfile(path):
-        return f"Error: File not found or is not a regular file: '{file_path}'"
-    return "En Proceso"
-
-
-def read_file(file):
-    MAX_CHARS = 10000
-    try:
-        with open(file,"r") as f:
-            string_text = f.read(MAX_CHARS)
-            return string_text if len(string_text)<MAX_CHARS else string_text + f"...File '{file}' truncated at 10000 characters"
-    except Exception as e:
-        return f"Error: {e}"
+schema_get_files_info = types.FunctionDeclaration(
+    name="get_files_info",
+    description="Lists files in the specified directory along with their sizes, constrained to the working directory. ",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="The directory to list files from, relative to the working directory. If not provided, lists files in the working directory itself. "
+                ),
+            },
+        ),
+    )
